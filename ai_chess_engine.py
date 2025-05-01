@@ -199,6 +199,19 @@ def draw_legal_moves(screen, board, selected_square):
                 3  # Border thickness
             )
 
+def draw_buttons(screen):
+    """Draw Reset button on the screen."""
+    font = pygame.font.SysFont('Arial', 20)
+
+    # Reset button
+    reset_button = pygame.Rect(10, 10, 100, 30)
+    pygame.draw.rect(screen, pygame.Color('lightgray'), reset_button)
+    reset_text = font.render("Reset", True, pygame.Color('black'))
+    screen.blit(reset_text, (reset_button.x + 25, reset_button.y + 5))
+
+    return reset_button
+
+
 def main():
     pygame.init()
     screen = pygame.display.set_mode((WIDTH, HEIGHT))
@@ -215,31 +228,46 @@ def main():
             if event.type == pygame.QUIT:
                 pygame.quit()
                 sys.exit()
-            elif event.type == pygame.MOUSEBUTTONDOWN and not ai_thinking:
+            elif event.type == pygame.MOUSEBUTTONDOWN:
                 location = pygame.mouse.get_pos()
-                col = location[0] // SQ_SIZE
-                row = location[1] // SQ_SIZE
-                clicked_square = chess.square(col, 7 - row)
-                if selected_square is None:
-                    # first click
-                    if board.piece_at(clicked_square) and board.piece_at(clicked_square).color == chess.WHITE:
-                        selected_square = clicked_square
-                        player_clicks = [selected_square]
-                else:
-                    # second click
-                    player_clicks.append(clicked_square)
-                    move = chess.Move(player_clicks[0], player_clicks[1])
-                    if move in board.legal_moves:
-                        board.push(move)
-                        print(f"Player made move: {move}")  # Debugging statement
-                        ai_thinking = True
-                        threading.Thread(target=ai_move, args=(board, 3)).start()
+
+                # Check if Reset button is clicked
+                if reset_button.collidepoint(location):
+                    board = chess.Board()  # Reset the board
                     selected_square = None
                     player_clicks = []
+                    ai_last_move = None
+                    ai_thinking = False
+                    print("Game reset!")
+
+                # Handle chessboard clicks
+                elif not ai_thinking:
+                    col = location[0] // SQ_SIZE
+                    row = location[1] // SQ_SIZE
+                    clicked_square = chess.square(col, 7 - row)
+                    if selected_square is None:
+                        # first click
+                        if board.piece_at(clicked_square) and board.piece_at(clicked_square).color == chess.WHITE:
+                            selected_square = clicked_square
+                            player_clicks = [selected_square]
+                    else:
+                        # second click
+                        player_clicks.append(clicked_square)
+                        move = chess.Move(player_clicks[0], player_clicks[1])
+                        if move in board.legal_moves:
+                            board.push(move)
+                            print(f"Player made move: {move}")  # Debugging statement
+                            ai_thinking = True
+                            threading.Thread(target=ai_move, args=(board, 3)).start()
+                        selected_square = None
+                        player_clicks = []
 
         # Draw the board and pieces
         draw_board(screen)
         draw_pieces(screen, board)
+
+        # Draw Reset button
+        reset_button = draw_buttons(screen)
 
         # Highlight the selected square
         if selected_square is not None:
