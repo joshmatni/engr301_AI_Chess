@@ -16,9 +16,10 @@ tile_scores = {
 
 
 # UI Constants
-WIDTH, HEIGHT = 512, 512
-DIMENSION = 8  # chess board is 8x8
-SQ_SIZE = HEIGHT // DIMENSION
+ #Updated UI Constants
+WIDTH, HEIGHT = 600, 600  # Increase screen size
+DIMENSION = 8  # Chessboard is 8x8
+SQ_SIZE = HEIGHT // DIMENSION  # Adjust square size based on new screen size
 MAX_FPS = 15  # for animations and input handling
 IMAGES = {}
 
@@ -49,12 +50,28 @@ def load_images():
 
 
 def draw_board(screen):
-    """Draw chessboard squares on the screen"""
+    """Draw chessboard squares on the screen."""
     colors = [pygame.Color('white'), pygame.Color('gray')]
     for r in range(DIMENSION):
         for c in range(DIMENSION):
             color = colors[(r + c) % 2]
             pygame.draw.rect(screen, color, pygame.Rect(c * SQ_SIZE, r * SQ_SIZE, SQ_SIZE, SQ_SIZE))
+
+def draw_grid_labels(screen):
+    """Draw grid labels (letters and numbers) around the chessboard."""
+    font = pygame.font.SysFont('Arial', 20)
+    letters = 'ABCDEFGH'
+    numbers = '87654321'
+
+    # Draw letters (A-H) along the bottom
+    for i in range(DIMENSION):
+        letter = font.render(letters[i], True, pygame.Color('black'))
+        screen.blit(letter, (i * SQ_SIZE + SQ_SIZE // 2 - letter.get_width() // 2, HEIGHT - 20))
+
+    # Draw numbers (1-8) along the left side
+    for i in range(DIMENSION):
+        number = font.render(numbers[i], True, pygame.Color('black'))
+        screen.blit(number, (5, i * SQ_SIZE + SQ_SIZE // 2 - number.get_height() // 2))
 
 def draw_pieces(screen, board):
     """Draw pieces on their current squares"""
@@ -219,7 +236,7 @@ def main():
     board = chess.Board()
     load_images()
     selected_square = None
-    player_clicks = []  # track clicks for move
+    player_clicks = []  # Track clicks for move
     global ai_thinking, ai_last_move
     ai_last_move = None  # Initialize the AI's last move
 
@@ -246,12 +263,12 @@ def main():
                     row = location[1] // SQ_SIZE
                     clicked_square = chess.square(col, 7 - row)
                     if selected_square is None:
-                        # first click
+                        # First click
                         if board.piece_at(clicked_square) and board.piece_at(clicked_square).color == chess.WHITE:
                             selected_square = clicked_square
                             player_clicks = [selected_square]
                     else:
-                        # second click
+                        # Second click
                         player_clicks.append(clicked_square)
                         move = chess.Move(player_clicks[0], player_clicks[1])
                         if move in board.legal_moves:
@@ -265,6 +282,9 @@ def main():
         # Draw the board and pieces
         draw_board(screen)
         draw_pieces(screen, board)
+
+        # Draw grid labels
+        draw_grid_labels(screen)
 
         # Draw Reset button
         reset_button = draw_buttons(screen)
