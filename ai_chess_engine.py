@@ -229,6 +229,27 @@ def draw_buttons(screen):
     return reset_button
 
 
+def give_hint(board):
+    """Provide a hint for the player by suggesting a good move."""
+    if board.turn == chess.WHITE:
+        hint_move = find_best_move(board, depth=2)  # Use a lower depth for quick hints
+        if hint_move:
+            print(f"Hint: Try move {hint_move.uci()}")
+            return hint_move
+    print("No hints available.")
+    return None
+
+def display_message(screen, message, color):
+    """Display a message in the center of the screen."""
+    font = pygame.font.SysFont('Arial', 36)
+    text_surface = font.render(message, True, color)
+    screen.blit(
+        text_surface,
+        (WIDTH // 2 - text_surface.get_width() // 2, HEIGHT // 2 - text_surface.get_height() // 2)
+    )
+    pygame.display.flip()
+    time.sleep(2)  # Display the message for 2 seconds
+
 def main():
     pygame.init()
     screen = pygame.display.set_mode((WIDTH, HEIGHT))
@@ -257,6 +278,17 @@ def main():
                     ai_thinking = False
                     print("Game reset!")
 
+                # Check if Hint button is clicked
+                elif hint_button.collidepoint(location):
+                    hint_move = give_hint(board)
+                    if hint_move:
+                        font = pygame.font.SysFont('Arial', 20)
+                        hint_text = f"Hint: {hint_move.uci()}"
+                        text_surface = font.render(hint_text, True, pygame.Color('blue'))
+                        screen.blit(text_surface, (10, 50))  # Display hint below the buttons
+                        pygame.display.flip()
+                        time.sleep(2)  # Display the hint for 2 seconds
+
                 # Handle chessboard clicks
                 elif not ai_thinking:
                     col = location[0] // SQ_SIZE
@@ -279,6 +311,14 @@ def main():
                         selected_square = None
                         player_clicks = []
 
+        # Check for game over conditions
+        if board.is_checkmate():
+            display_message(screen, "You Win!", pygame.Color('green'))
+            board = chess.Board()  # Reset the board after the message
+        elif board.is_stalemate():
+            display_message(screen, "Stalemate!", pygame.Color('orange'))
+            board = chess.Board()  # Reset the board after the message
+
         # Draw the board and pieces
         draw_board(screen)
         draw_pieces(screen, board)
@@ -286,8 +326,8 @@ def main():
         # Draw grid labels
         draw_grid_labels(screen)
 
-        # Draw Reset button
-        reset_button = draw_buttons(screen)
+        # Draw Reset and Hint buttons
+        reset_button, hint_button = draw_buttons(screen)
 
         # Highlight the selected square
         if selected_square is not None:
@@ -312,6 +352,24 @@ def main():
 
         pygame.display.flip()
         clock.tick(MAX_FPS)
+
+def draw_buttons(screen):
+    """Draw Reset and Hint buttons on the screen."""
+    font = pygame.font.SysFont('Arial', 20)
+
+    # Reset button
+    reset_button = pygame.Rect(10, 10, 100, 30)
+    pygame.draw.rect(screen, pygame.Color('lightgray'), reset_button)
+    reset_text = font.render("Reset", True, pygame.Color('black'))
+    screen.blit(reset_text, (reset_button.x + 25, reset_button.y + 5))
+
+    # Hint button
+    hint_button = pygame.Rect(120, 10, 100, 30)
+    pygame.draw.rect(screen, pygame.Color('lightgray'), hint_button)
+    hint_text = font.render("Hint", True, pygame.Color('black'))
+    screen.blit(hint_text, (hint_button.x + 30, hint_button.y + 5))
+
+    return reset_button, hint_button
 
 if __name__ == '__main__':
     main()
