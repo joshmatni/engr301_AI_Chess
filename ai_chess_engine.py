@@ -216,17 +216,17 @@ def draw_legal_moves(screen, board, selected_square):
                 3  # Border thickness
             )
 
-def draw_buttons(screen):
-    """Draw Reset button on the screen."""
-    font = pygame.font.SysFont('Arial', 20)
+# def draw_buttons(screen):
+#     """Draw Reset button on the screen."""
+#     font = pygame.font.SysFont('Arial', 20)
 
-    # Reset button
-    reset_button = pygame.Rect(10, 10, 100, 30)
-    pygame.draw.rect(screen, pygame.Color('lightgray'), reset_button)
-    reset_text = font.render("Reset", True, pygame.Color('black'))
-    screen.blit(reset_text, (reset_button.x + 25, reset_button.y + 5))
+#     # Reset button
+#     reset_button = pygame.Rect(10, 10, 100, 30)
+#     pygame.draw.rect(screen, pygame.Color('lightgray'), reset_button)
+#     reset_text = font.render("Reset", True, pygame.Color('black'))
+#     screen.blit(reset_text, (reset_button.x + 25, reset_button.y + 5))
 
-    return reset_button
+#     return reset_button
 
 
 def give_hint(board):
